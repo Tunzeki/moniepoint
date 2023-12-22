@@ -94,6 +94,33 @@ HAVING
   AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 ORDER BY month_of_year ASC;
 
+-- Get monthly total number of trips on Sundays from Jan 01, 2014 to Dec 31, 2016
+SELECT
+  DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+    COUNT(*) AS sun_trip_count
+FROM tripdata 
+GROUP BY month_of_year 
+HAVING 
+  month_of_year BETWEEN '2014-01' AND '2016-12' 
+  AND toDayOfWeek(pickup_date) == 7 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
+ORDER BY month_of_year ASC;
+
+-- Get number of Sundays in each month from Jan 01, 2014 to Dec 31, 2016
+SELECT 
+DATE_FORMAT(sundays, '%Y-%m') AS month_of_year,
+COUNT (DISTINCT sundays) AS number_of_sun_in_the_month -- NUMBER OF SUNDAYS IN THE MONTH
+FROM
+(SELECT pickup_date AS sundays -- ALL SUNDAYS IN THE MONTH
+FROM
+(
+SELECT
+  pickup_date -- ALL DAYS OF THE MONTH
+FROM tripdata 
+WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
+) AS days_of_the_month
+WHERE toDayOfWeek(pickup_date) == 7) AS sundays_dates
+GROUP BY month_of_year
+ORDER BY month_of_year ASC;
 
 /*
   Average number of trips on Saturdays = 
@@ -109,13 +136,19 @@ ORDER BY month_of_year ASC;
   convert average duration per trip to minute in the query output.
   Average duration per trip on Saturdays =
   total duration of all Saturday trips in a month / total number of Saturday trips that month
+
+  Similar arithmetic applies for finding the average number of trips on Sundays,
+  the average fare per trip on Sundays, and the average duration per trip on Sundays
 */ 
 
 SELECT
-  a.month_of_year,
+  a.month_of_year AS `month`,
   (a.sat_trip_count / b.number_of_sat_in_the_month) AS sat_mean_trip_count,
   (a.total_fare / a.sat_trip_count) AS sat_mean_fare_per_trip,
-  (a.sat_total_trip_duration / a.sat_trip_count) / 60 AS sat_mean_duration_per_trip -- in minutes
+  (a.sat_total_trip_duration / a.sat_trip_count) / 60 AS sat_mean_duration_per_trip, -- in minutes
+  (c.sun_trip_count / d.number_of_sun_in_the_month) AS sun_mean_trip_count,
+  (c.sun_total_fare / c.sun_trip_count) AS sun_mean_fare_per_trip,
+  (c.sun_total_trip_duration / c.sun_trip_count) / 60 AS sun_mean_duration_per_trip -- in minutes
 FROM 
 (
   -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
@@ -155,4 +188,40 @@ INNER JOIN
   GROUP BY month_of_year
   ORDER BY month_of_year ASC
 ) AS b
-ON a.month_of_year = b.month_of_year;
+ON a.month_of_year = b.month_of_year
+INNER JOIN 
+(
+  -- Get monthly total number of trips on Sundays from Jan 01, 2014 to Dec 31, 2016
+  SELECT
+    DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+      COUNT(*) AS sun_trip_count,
+      SUM(fare_amount) AS sun_total_fare,
+      SUM(date_diff('second', pickup_datetime, dropoff_datetime)) AS sun_total_trip_duration
+  FROM tripdata 
+  GROUP BY month_of_year 
+  HAVING 
+    month_of_year BETWEEN '2014-01' AND '2016-12' 
+    AND toDayOfWeek(pickup_date) == 7
+  ORDER BY month_of_year ASC
+) AS c 
+ON a.month_of_year = c.month_of_year
+INNER JOIN
+(
+  -- Get number of Sundays in each month from Jan 01, 2014 to Dec 31, 2016
+  SELECT 
+  DATE_FORMAT(sundays, '%Y-%m') AS month_of_year,
+  COUNT (DISTINCT sundays) AS number_of_sun_in_the_month -- NUMBER OF SUNDAYS IN THE MONTH
+  FROM
+  (SELECT pickup_date AS sundays -- ALL SUNDAYS IN THE MONTH
+  FROM
+  (
+  SELECT
+    pickup_date -- ALL DAYS OF THE MONTH
+  FROM tripdata 
+  WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
+  ) AS days_of_the_month
+  WHERE toDayOfWeek(pickup_date) == 7) AS sundays_dates
+  GROUP BY month_of_year
+  ORDER BY month_of_year ASC
+) AS d 
+ON a.month_of_year = d.month_of_year;
