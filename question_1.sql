@@ -6,8 +6,8 @@ FROM tripdata
 GROUP BY month_of_year 
 HAVING 
   month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-ORDER BY month_of_year ASC;
+  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 
 -- Get number of Saturdays in each month_of_year from Jan 01, 2014 to Dec 31, 2016
 SELECT 
@@ -34,17 +34,17 @@ SELECT
   (a.sat_trip_count / b.number_of_sat_in_the_month) AS sat_mean_trip_count
 FROM 
 (
-    -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
-    SELECT
-        DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-        COUNT(*) AS sat_trip_count
-    FROM 
-    tripdata 
-    GROUP BY month_of_year 
-    HAVING 
-    month_of_year BETWEEN '2014-01' AND '2016-12' 
-    AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-    ORDER BY month_of_year ASC
+  -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
+  SELECT
+      DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+      COUNT(*) AS sat_trip_count
+  FROM 
+  tripdata 
+  GROUP BY month_of_year 
+  HAVING 
+  month_of_year BETWEEN '2014-01' AND '2016-12' 
+  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+  ORDER BY month_of_year ASC -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 ) AS a
 INNER JOIN 
 (
@@ -80,8 +80,8 @@ FROM tripdata
 GROUP BY month_of_year 
 HAVING 
   month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-ORDER BY month_of_year ASC;
+  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 
 -- Get monthly total trip duration for all Saturdays trips from Jan 01, 2014 to Dec 31, 2016
 SELECT
@@ -91,8 +91,8 @@ FROM tripdata
 GROUP BY month_of_year 
 HAVING 
   month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-ORDER BY month_of_year ASC;
+  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 
 -- Get monthly total number of trips on Sundays from Jan 01, 2014 to Dec 31, 2016
 SELECT
@@ -102,8 +102,8 @@ FROM tripdata
 GROUP BY month_of_year 
 HAVING 
   month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 7 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-ORDER BY month_of_year ASC;
+  AND toDayOfWeek(pickup_date) == 7 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 
 -- Get number of Sundays in each month from Jan 01, 2014 to Dec 31, 2016
 SELECT 
@@ -162,8 +162,8 @@ FROM
   GROUP BY month_of_year 
   HAVING 
   month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-  ORDER BY month_of_year ASC
+  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+  ORDER BY month_of_year ASC -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
 ) AS a
 INNER JOIN 
 (
