@@ -142,13 +142,13 @@ ORDER BY month_of_year ASC;
 */ 
 
 SELECT
-  a.month_of_year AS `month`,
-  (a.sat_trip_count / b.number_of_sat_in_the_month) AS sat_mean_trip_count,
-  (a.total_fare / a.sat_trip_count) AS sat_mean_fare_per_trip,
-  (a.sat_total_trip_duration / a.sat_trip_count) / 60 AS sat_mean_duration_per_trip, -- in minutes
-  (c.sun_trip_count / d.number_of_sun_in_the_month) AS sun_mean_trip_count,
-  (c.sun_total_fare / c.sun_trip_count) AS sun_mean_fare_per_trip,
-  (c.sun_total_trip_duration / c.sun_trip_count) / 60 AS sun_mean_duration_per_trip -- in minutes
+  a.month_of_year AS `month`, -- round off averages to 1 decimal place
+  round((a.sat_trip_count / b.number_of_sat_in_the_month), 1) AS sat_mean_trip_count,
+  round((a.total_fare / a.sat_trip_count), 1) AS sat_mean_fare_per_trip,
+  round((a.sat_total_trip_duration / a.sat_trip_count) / 60, 1) AS sat_mean_duration_per_trip, -- in minutes
+  round((c.sun_trip_count / d.number_of_sun_in_the_month), 1) AS sun_mean_trip_count,
+  round((c.sun_total_fare / c.sun_trip_count), 1) AS sun_mean_fare_per_trip,
+  round((c.sun_total_trip_duration / c.sun_trip_count) / 60, 1) AS sun_mean_duration_per_trip -- in minutes
 FROM 
 (
   -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
