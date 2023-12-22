@@ -75,7 +75,7 @@ ON a.month_of_year = b.month_of_year;
 -- Get monthly total fare for all Saturday trips from Jan 01, 2014 to Dec 31, 2016
 SELECT
   DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-  SUM(fare_amount) AS total_fare
+  SUM(fare_amount) AS sat_total_fare
 FROM tripdata 
 GROUP BY month_of_year 
 HAVING 
@@ -144,7 +144,7 @@ ORDER BY month_of_year ASC;
 SELECT
   a.month_of_year AS `month`, -- round off averages to 1 decimal place
   round((a.sat_trip_count / b.number_of_sat_in_the_month), 1) AS sat_mean_trip_count,
-  round((a.total_fare / a.sat_trip_count), 1) AS sat_mean_fare_per_trip,
+  round((a.sat_total_fare / a.sat_trip_count), 1) AS sat_mean_fare_per_trip,
   round((a.sat_total_trip_duration / a.sat_trip_count) / 60, 1) AS sat_mean_duration_per_trip, -- in minutes
   round((c.sun_trip_count / d.number_of_sun_in_the_month), 1) AS sun_mean_trip_count,
   round((c.sun_total_fare / c.sun_trip_count), 1) AS sun_mean_fare_per_trip,
@@ -155,7 +155,7 @@ FROM
   SELECT
       DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
       COUNT(*) AS sat_trip_count,
-      SUM(fare_amount) AS total_fare,
+      SUM(fare_amount) AS sat_total_fare,
       SUM(date_diff('second', pickup_datetime, dropoff_datetime)) AS sat_total_trip_duration
   FROM 
   tripdata 
