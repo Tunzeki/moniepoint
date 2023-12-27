@@ -1,127 +1,3 @@
--- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
-SELECT
-  DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-    COUNT(*) AS sat_trip_count
-FROM tripdata 
-GROUP BY month_of_year 
-HAVING 
-  month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
-ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-
--- Get number of Saturdays in each month_of_year from Jan 01, 2014 to Dec 31, 2016
-SELECT 
-DATE_FORMAT(saturdays, '%Y-%m') AS month_of_year,
-COUNT (DISTINCT saturdays) AS number_of_sat_in_the_month -- NUMBER OF SATURDAYS IN THE MONTH
-FROM
-(SELECT pickup_date AS saturdays -- ALL SATURDAYS IN THE MONTH
-FROM
-(
-SELECT
-  pickup_date -- ALL DAYS OF THE MONTH
-FROM tripdata 
-WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
-) AS days_of_the_month
-WHERE toDayOfWeek(pickup_date) == 6) AS saturdays_dates
-GROUP BY month_of_year
-ORDER BY month_of_year ASC;
-
-
--- average number of trips on Saturdays between Jan 01, 2014 and Dec 31, 2016
--- = total number of Saturday trips each month / number of Saturdays in the month
-SELECT
-  a.month_of_year,
-  (a.sat_trip_count / b.number_of_sat_in_the_month) AS sat_mean_trip_count
-FROM 
-(
-  -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
-  SELECT
-      DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-      COUNT(*) AS sat_trip_count
-  FROM 
-  tripdata 
-  GROUP BY month_of_year 
-  HAVING 
-  month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
-  ORDER BY month_of_year ASC -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-) AS a
-INNER JOIN 
-(
-    -- Get number of Saturdays in each month from Jan 01, 2014 to Dec 31, 2016
-    SELECT 
-        DATE_FORMAT(saturdays, '%Y-%m') AS month_of_year,
-        COUNT (DISTINCT saturdays) AS number_of_sat_in_the_month -- NUMBER OF SATURDAYS IN THE MONTH
-    FROM
-    (
-        SELECT 
-            pickup_date AS saturdays -- ALL SATURDAYS IN THE MONTH
-        FROM
-        (
-            SELECT
-                pickup_date -- ALL DAYS OF THE MONTH
-            FROM 
-            tripdata 
-            WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
-        ) AS days_of_the_month
-        WHERE toDayOfWeek(pickup_date) == 6
-    ) AS saturdays_dates
-    GROUP BY month_of_year
-    ORDER BY month_of_year ASC
-) AS b
-ON a.month_of_year = b.month_of_year;
-
-
--- Get monthly total fare for all Saturday trips from Jan 01, 2014 to Dec 31, 2016
-SELECT
-  DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-  SUM(fare_amount) AS sat_total_fare
-FROM tripdata 
-GROUP BY month_of_year 
-HAVING 
-  month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
-ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-
--- Get monthly total trip duration for all Saturdays trips from Jan 01, 2014 to Dec 31, 2016
-SELECT
-  DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-  SUM(date_diff('second', pickup_datetime, dropoff_datetime)) AS total_trip_duration
-FROM tripdata 
-GROUP BY month_of_year 
-HAVING 
-  month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
-ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-
--- Get monthly total number of trips on Sundays from Jan 01, 2014 to Dec 31, 2016
-SELECT
-  DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
-    COUNT(*) AS sun_trip_count
-FROM tripdata 
-GROUP BY month_of_year 
-HAVING 
-  month_of_year BETWEEN '2014-01' AND '2016-12' 
-  AND toDayOfWeek(pickup_date) == 7 -- toDayOfWeek(date) assumes Monday as the first day of the week...
-ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
-
--- Get number of Sundays in each month from Jan 01, 2014 to Dec 31, 2016
-SELECT 
-DATE_FORMAT(sundays, '%Y-%m') AS month_of_year,
-COUNT (DISTINCT sundays) AS number_of_sun_in_the_month -- NUMBER OF SUNDAYS IN THE MONTH
-FROM
-(SELECT pickup_date AS sundays -- ALL SUNDAYS IN THE MONTH
-FROM
-(
-SELECT
-  pickup_date -- ALL DAYS OF THE MONTH
-FROM tripdata 
-WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
-) AS days_of_the_month
-WHERE toDayOfWeek(pickup_date) == 7) AS sundays_dates
-GROUP BY month_of_year
-ORDER BY month_of_year ASC;
-
 /*
   Average number of trips on Saturdays = 
   total number of Saturday trips each month / number of Saturdays in the month
@@ -151,7 +27,10 @@ SELECT
   round((c.sun_total_trip_duration / c.sun_trip_count) / 60, 1) AS sun_mean_duration_per_trip -- in minutes
 FROM 
 (
-  -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
+  -- Get monthly total number of trips on Saturdays,
+  -- total fare for all Saturday trips every month
+  -- and the total duration of all Saturday trips every month
+  -- from Jan 01, 2014 to Dec 31, 2016
   SELECT
       DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
       COUNT(*) AS sat_trip_count,
@@ -191,7 +70,10 @@ INNER JOIN
 ON a.month_of_year = b.month_of_year
 INNER JOIN 
 (
-  -- Get monthly total number of trips on Sundays from Jan 01, 2014 to Dec 31, 2016
+  -- Get monthly total number of trips on Sundays,
+  -- total fare for all Sunday trips every month
+  -- and the total duration of all Sunday trips every month
+  -- from Jan 01, 2014 to Dec 31, 2016
   SELECT
     DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
       COUNT(*) AS sun_trip_count,
@@ -225,3 +107,129 @@ INNER JOIN
   ORDER BY month_of_year ASC
 ) AS d 
 ON a.month_of_year = d.month_of_year;
+
+-- I wrote the final query first so you won't have to scroll down to view it
+-- The queries below I have commented out were foundational to building the final query
+-- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
+-- SELECT
+--   DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+--     COUNT(*) AS sat_trip_count
+-- FROM tripdata 
+-- GROUP BY month_of_year 
+-- HAVING 
+--   month_of_year BETWEEN '2014-01' AND '2016-12' 
+--   AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+-- ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
+
+-- Get number of Saturdays in each month_of_year from Jan 01, 2014 to Dec 31, 2016
+-- SELECT 
+-- DATE_FORMAT(saturdays, '%Y-%m') AS month_of_year,
+-- COUNT (DISTINCT saturdays) AS number_of_sat_in_the_month -- NUMBER OF SATURDAYS IN THE MONTH
+-- FROM
+-- (SELECT pickup_date AS saturdays -- ALL SATURDAYS IN THE MONTH
+-- FROM
+-- (
+-- SELECT
+--   pickup_date -- ALL DAYS OF THE MONTH
+-- FROM tripdata 
+-- WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
+-- ) AS days_of_the_month
+-- WHERE toDayOfWeek(pickup_date) == 6) AS saturdays_dates
+-- GROUP BY month_of_year
+-- ORDER BY month_of_year ASC;
+
+
+-- average number of trips on Saturdays between Jan 01, 2014 and Dec 31, 2016
+-- = total number of Saturday trips each month / number of Saturdays in the month
+-- SELECT
+--   a.month_of_year,
+--   (a.sat_trip_count / b.number_of_sat_in_the_month) AS sat_mean_trip_count
+-- FROM 
+-- (
+--   -- Get monthly total number of trips on Saturdays from Jan 01, 2014 to Dec 31, 2016
+--   SELECT
+--       DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+--       COUNT(*) AS sat_trip_count
+--   FROM 
+--   tripdata 
+--   GROUP BY month_of_year 
+--   HAVING 
+--   month_of_year BETWEEN '2014-01' AND '2016-12' 
+--   AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+--   ORDER BY month_of_year ASC -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
+-- ) AS a
+-- INNER JOIN 
+-- (
+--     -- Get number of Saturdays in each month from Jan 01, 2014 to Dec 31, 2016
+--     SELECT 
+--         DATE_FORMAT(saturdays, '%Y-%m') AS month_of_year,
+--         COUNT (DISTINCT saturdays) AS number_of_sat_in_the_month -- NUMBER OF SATURDAYS IN THE MONTH
+--     FROM
+--     (
+--         SELECT 
+--             pickup_date AS saturdays -- ALL SATURDAYS IN THE MONTH
+--         FROM
+--         (
+--             SELECT
+--                 pickup_date -- ALL DAYS OF THE MONTH
+--             FROM 
+--             tripdata 
+--             WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
+--         ) AS days_of_the_month
+--         WHERE toDayOfWeek(pickup_date) == 6
+--     ) AS saturdays_dates
+--     GROUP BY month_of_year
+--     ORDER BY month_of_year ASC
+-- ) AS b
+-- ON a.month_of_year = b.month_of_year;
+
+
+-- Get monthly total fare for all Saturday trips from Jan 01, 2014 to Dec 31, 2016
+-- SELECT
+--   DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+--   SUM(fare_amount) AS sat_total_fare
+-- FROM tripdata 
+-- GROUP BY month_of_year 
+-- HAVING 
+--   month_of_year BETWEEN '2014-01' AND '2016-12' 
+--   AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+-- ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
+
+-- -- Get monthly total trip duration for all Saturdays trips from Jan 01, 2014 to Dec 31, 2016
+-- SELECT
+--   DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+--   SUM(date_diff('second', pickup_datetime, dropoff_datetime)) AS total_trip_duration
+-- FROM tripdata 
+-- GROUP BY month_of_year 
+-- HAVING 
+--   month_of_year BETWEEN '2014-01' AND '2016-12' 
+--   AND toDayOfWeek(pickup_date) == 6 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+-- ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
+
+-- Get monthly total number of trips on Sundays from Jan 01, 2014 to Dec 31, 2016
+-- SELECT
+--   DATE_FORMAT(pickup_date, '%Y-%m') AS month_of_year, -- month_of_year
+--     COUNT(*) AS sun_trip_count
+-- FROM tripdata 
+-- GROUP BY month_of_year 
+-- HAVING 
+--   month_of_year BETWEEN '2014-01' AND '2016-12' 
+--   AND toDayOfWeek(pickup_date) == 7 -- toDayOfWeek(date) assumes Monday as the first day of the week...
+-- ORDER BY month_of_year ASC; -- and represents it with 1, Tuesday with 2, ..., Saturday with 6, and Sunday with 7
+
+-- Get number of Sundays in each month from Jan 01, 2014 to Dec 31, 2016
+-- SELECT 
+-- DATE_FORMAT(sundays, '%Y-%m') AS month_of_year,
+-- COUNT (DISTINCT sundays) AS number_of_sun_in_the_month -- NUMBER OF SUNDAYS IN THE MONTH
+-- FROM
+-- (SELECT pickup_date AS sundays -- ALL SUNDAYS IN THE MONTH
+-- FROM
+-- (
+-- SELECT
+--   pickup_date -- ALL DAYS OF THE MONTH
+-- FROM tripdata 
+-- WHERE DATE_FORMAT(pickup_date, '%Y-%m') BETWEEN '2014-01' AND '2016-12'
+-- ) AS days_of_the_month
+-- WHERE toDayOfWeek(pickup_date) == 7) AS sundays_dates
+-- GROUP BY month_of_year
+-- ORDER BY month_of_year ASC;
