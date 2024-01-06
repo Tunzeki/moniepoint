@@ -1,8 +1,8 @@
-# Moniepoint Take Home Test for the Data Engineer Position: Babatunde Ademusire's Submission
+# An End-To-End Data Engineering Project
 
 ## Introduction
 
-This documentation covers how I approached the two questions in the take home test. The instructions to complete the test can be found [here](/Instructions_(1).docx)
+This documentation covers how I approached the two questions in the take-home test for a data engineering position I applied for. The instructions to complete the test can be found [here](/Instructions_(1).docx)
 
 ## Question 1
 The first question was to write a query that fetched the following monthly metrics from the New York City taxi trip dataset which is stored in a [Clickhouse database accessible here](https://github.demo.trial.altinity.cloud:8443/play):
@@ -255,7 +255,9 @@ ON a.month_of_year = d.month_of_year;
 
 Note that we divided the average duration by 60 in `round((a.sat_total_trip_duration / a.sat_trip_count) / 60, 1) AS sat_mean_duration_per_trip` and did the same for the Sunday metric. This is because we used second as our unit in the `datediff` function in order to prevent over/underestimation of the duration due to approximation that might occur if we used minute or hour as our unit in this function. Thus, it was necessary to divide by 60 in order to convert the unit from seconds to minutes.
 
-TODO: Make the query more readable by using putting the result of each subquery into a view and use the views in the final query.
+This screenshot shows a portion of the result when the query is run. 
+
+![Screenshot showinfg a portion of the result when the query is run](moniepoint_question_1_query_result.png)
 
 ## Question 2
 
